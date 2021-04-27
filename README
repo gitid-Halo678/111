@@ -1,0 +1,80 @@
+"""
+
+
+"""
+
+from wsgiref.simple_server import make_server
+from urls import *
+from views import *
+
+
+
+# def index(env):
+#     return 'index'
+#
+# def login(env):
+#     return 'login'
+#
+# def error(env):
+#     return 'error 404'
+#
+#
+# urls = [
+#     ('/index',index),
+#     ('/login',login),
+#     ('/error',error)
+# ]
+
+
+def run(env,response):
+    """
+
+    :param env: 请求相关的所有数据
+    :param response: 响应相关的所有数据
+    :return: 返回给浏览器的所有数据
+    """
+    # print(env) # 大字典 wsgiref模块处理好HTTP格式的数据，封装成了字典可以更方便的操作
+
+    response('200 OK',[])  # 响应首行+响应头
+
+    current_path = env.get('PATH_INFO')
+    """
+    if current_path == '/index':
+        return [b'index']
+
+    elif current_path == '/login':
+        return [b'login']
+
+    return [b'hello world 404'] # return 返回的内容格式是固定的，即：[b'字符串']
+    """
+
+    func = None
+    for url in urls:
+        if current_path == url[0]:
+            func = url[1]
+            break
+
+    if func:
+        res = func(env)
+
+    else:
+        res = error(env)
+
+    return [res.encode('utf-8')]
+
+
+if __name__ == '__main__':
+
+    """
+    会实时监听127.0.0.1:8080地址，只要有客户端来了
+    都会交给run函数处理（加括号触发run函数的运行）
+    """
+    server = make_server('127.0.0.1',8080,run)
+
+    server.serve_forever()  # 启动服务端
+
+
+
+
+
+
