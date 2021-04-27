@@ -1,0 +1,59 @@
+'''
+
+公共方法
+
+'''
+
+from db import models
+
+# 登录认证装饰器
+def auth(role):
+
+    # 为什么在这里导入模块不会发生循环导入问题
+    from core import admin
+    from core import student
+    from core import teacher
+
+    def login_auth(func):
+        def inner(*args,**kwargs):
+            if role=='admin':
+                if admin.admin_info['login_user']:
+                    res=func(*args,**kwargs)
+                    return res
+                else:
+                    print('请先登录')
+                    admin.admin_login()
+
+            elif role=='student':
+                if student.student_info['login_user']:
+                    res = func(*args, **kwargs)
+                    return res
+                else:
+                    print('请先登录')
+                    student.student_login()
+
+            elif role=='teacher':
+                if teacher.teacher_info['login_user']:
+                    res = func(*args, **kwargs)
+                    return res
+                else:
+                    print('请先登录')
+                    teacher.teacher_login()
+
+            else:
+                print('当前状态没有权限')
+
+        return inner
+    return login_auth
+
+
+# 获取学校下所有课程接口：
+def get_course_in_school_list(school_name):
+    school_obj=models.School.select(school_name)
+    course_list=school_obj.course_list
+
+    if course_list:
+        return True,course_list
+
+    else:
+        return False,'该校区下没有课程'
