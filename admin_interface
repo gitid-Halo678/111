@@ -1,0 +1,98 @@
+'''
+
+管理员接口
+
+'''
+
+from db import models
+
+# 管理员注册接口
+def admin_register_interface(username,password):
+
+    # 在用models调用Admin类里面的select功能的时候，会自动将Admin作为参数(cls)传入。（重要）
+    user_path=models.Admin.select(username)
+
+    if user_path:
+        return False,'用户已存在！'
+    else:
+        admin_obj = models.Admin(username, password)
+        admin_obj.save()
+        return True,'注册成功！'
+
+# 管理员登录接口
+# def admin_login_interface(username,password):
+#
+#     admin_obj=models.Admin.select(username)
+#     if not admin_obj:
+#         return False,'用户不存在'
+#     elif password==admin_obj.pwd:
+#         return True,'登陆成功'
+#     else:
+#         return False,'密码错误'
+
+'''
+def login_interface(user,pwd,user_type):
+
+    if user_type == 'admin':
+        obj = models.Admin.select(user)
+
+    elif user_type=='student':
+        obj = models.Student.select(user)
+
+    elif user_type=='teacher':
+        obj = models.Teacher.select(user)
+
+    else:
+        return False,'没有权限'
+
+    if obj:
+        if pwd == obj.pwd:
+            return True, '登陆成功'
+        else:
+            return False, '密码错误'
+
+    else:
+        return False, '用户不存在'
+'''
+
+# 管理员创建学校功能
+def admin_creat_school(school_name,school_addr,admin_name):
+
+    # 1.判断学校是否存在
+    school_obj=models.School.select(school_name)
+
+    # 2.不存在则创建 (通过管理员来创建)
+    if not school_obj:
+        admin_obj=models.Admin.select(admin_name)
+        admin_obj.creat_school(school_name,school_addr)
+        return True,'创建成功'
+
+    # 3.存在则返回已存在
+    else:
+        return False,'学校已存在'
+
+# 创建课程功能
+def admin_creat_course(school_name,course_name,admin_name):
+    school_obj=models.School.select(school_name)
+    if course_name in school_obj.course_list:
+        return False,'当前课程已存在'
+
+    admin_obj=models.Admin.select(admin_name)
+    admin_obj.creat_course(
+        school_obj, course_name
+    )
+
+    return True,f'{course_name} 创建成功 绑定给{school_name} 学校'
+
+# 创建老师功能
+def admin_creat_teacher(teacher_name,admin_name,teacher_pwd='123'):
+    teacher_obj=models.Teacher.select(teacher_name)
+
+    if teacher_obj:
+        return False,'老师已存在'
+
+    admin_obj=models.Admin.select(admin_name)
+    admin_obj.creat_teacher(teacher_name,teacher_pwd)
+
+    return True,f'{teacher_name} 老师创建成功'
+
